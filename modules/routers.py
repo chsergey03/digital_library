@@ -75,3 +75,15 @@ def log_in():
                            existing_login=existing_login,
                            existing_email=existing_email,
                            mismatched_passwords=mismatched_passwords)
+
+
+@app.route("/books", methods=["POST", "GET"])
+def books():
+    if request.method == "POST":
+        title_substr = request.form.get("title_substr")
+
+        books_table = Book.select().where(Book.title.contains(title_substr))
+    else:
+        books_table = Book.select()
+
+    return render_template("books.html", books=books_table)

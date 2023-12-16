@@ -27,4 +27,19 @@ class User(BaseModel):
         return len(User.select().where(getattr(User, field) == value)) != 0
 
 
-db.create_tables([User], safe=True)
+class Genre(BaseModel):
+    id = AutoField()
+    code = CharField(max_length=20, null=False, unique=True)
+    name = CharField(max_length=250, null=False, unique=True)
+
+
+class Book(BaseModel):
+    id = AutoField()
+    title = CharField(max_length=250, null=False)
+    author = CharField(max_length=250, null=False)
+    publisher = CharField(max_length=250, null=False)
+    release_year = IntegerField(null=False)
+    genre = ForeignKeyField(Genre, to_field="id")
+
+
+db.create_tables([User, Genre, Book], safe=True)
