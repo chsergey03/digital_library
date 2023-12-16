@@ -3,6 +3,16 @@ from modules.app import db
 from peewee import *
 
 
+def add_new_row(model, row_data_dict):
+    new_user = model(**row_data_dict)
+
+    new_user.save()
+
+
+def is_there_value_of_field(model, field, value):
+    return len(model.select().where(getattr(model, field) == value)) != 0
+
+
 class BaseModel(Model):
     class Meta:
         database = db
@@ -15,16 +25,10 @@ class User(BaseModel):
     password_hash = CharField(max_length=250, null=False, unique=False)
 
     @staticmethod
-    def add_new(login, email, password_hash):
-        new_user = User(login=login,
-                        email=email,
-                        password_hash=password_hash)
+    def add_new(attributes):
+        new_user = User(*attributes)
 
         new_user.save()
-
-    @staticmethod
-    def is_there_value_of_field(field, value):
-        return len(User.select().where(getattr(User, field) == value)) != 0
 
 
 class Genre(BaseModel):

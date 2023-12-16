@@ -48,15 +48,15 @@ def log_out():
 
 
 @app.route("/register", methods=["POST", "GET"])
-def log_in():
+def register():
     existing_login, existing_email, mismatched_passwords = False, False, False
 
     if request.method == "POST":
         login_value = request.form.get(FormsNames.LOGIN)
-        existing_login = User.is_there_value_of_field(FormsNames.LOGIN, login_value)
+        existing_login = is_there_value_of_field(User, FormsNames.LOGIN, login_value)
 
         email_value = request.form.get(FormsNames.EMAIL)
-        existing_email = User.is_there_value_of_field(FormsNames.EMAIL, email_value)
+        existing_email = is_there_value_of_field(User, FormsNames.EMAIL, email_value)
 
         password_value = request.form.get(FormsNames.PASSWORD)
         repeat_of_password_value = request.form.get(FormsNames.REPEAT_OF_PASSWORD)
@@ -67,7 +67,10 @@ def log_in():
             salt = gensalt()
             password_hash = hashpw(password_value.encode("utf8"), salt)
 
-            User.add_new(login_value, email_value, password_hash)
+            add_new_row(User,
+                        {"login": login_value,
+                         "email": email_value,
+                         "password_hash": password_hash})
 
             return redirect(url_for("index", authorized=True))
 
