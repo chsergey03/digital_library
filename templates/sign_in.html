@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block head_title %}
+    Вход
+{% endblock %}
+
+{% block body %}
+    <p style="text-align: center">
+        <a href="http://127.0.0.1:5000/register">
+            Регистрация
+        </a>
+    </p>
+
+    <form action="" method="post">
+        <p style="text-align: center">
+            <label for="login">
+                Логин:
+            </label>
+
+            <input type="text"
+                   id="login"
+                   name="login"
+                   size="30"
+                   required/>
+        </p>
+
+        <p style="text-align: center">
+            <label for="password">
+                Пароль:
+            </label>
+
+            <input type="password"
+                   id="password"
+                   name="password"
+                   size="30"
+                   required/>
+        </p>
+
+        <p style="text-align: center">
+            <input type="submit"
+                   value="Войти">
+        </p>
+    </form>
+
+    {% if error %}
+        <p style="text-align: center; color:red">
+            Неправильный логин или пароль
+        </p>
+    {% endif %}
+{% endblock %}

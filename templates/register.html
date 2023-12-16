@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block head_title %}
+    Регистрация
+{% endblock %}
+
+{% block body %}
+    <p style="text-align: center">
+        <a href="http://127.0.0.1:5000/sign_in">
+            Уже есть аккаунт? Войти
+        </a>
+    </p>
+
+    <form action="" method="post">
+        <p style="text-align: center">
+            <label for="login">
+                Логин:
+            </label>
+
+            <input type="text"
+                   id="login"
+                   name="login"
+                   size="30"
+                   required/>
+        </p>
+
+        <p style="text-align: center">
+            <label for="email">
+                E-mail:
+            </label>
+
+            <input type="text"
+                   id="email"
+                   name="email"
+                   size="30"
+                   required/>
+        </p>
+
+        <p style="text-align: center">
+            <label for="password">
+                Пароль (не менее 8 символов):
+            </label>
+
+            <input type="password"
+                   id="password"
+                   name="password"
+                   pattern=".{8,}"
+                   size="30"
+                   required/>
+        </p>
+
+        <p style="text-align: center">
+            <label for="repeat_of_password">
+                Повторите пароль:
+            </label>
+
+            <input type="password"
+                   id="repeat_of_password"
+                   name="repeat_of_password"
+                   pattern=".{8,}"
+                   size="30"
+                   required/>
+        </p>
+
+        <p style="text-align: center">
+            <input type="submit"
+                   value="Зарегистрироваться">
+        </p>
+    </form>
+
+    {% if existing_login %}
+        <p style="text-align: center; color:red">
+            Пользователь с таким логином уже существует
+        </p>
+    {% endif %}
+
+    {% if existing_email %}
+        <p style="text-align: center; color:red;">
+            Данная электронная почта уже используется другим пользователем
+        </p>
+    {% endif %}
+
+    {% if mismatched_passwords %}
+        <p style="text-align: center; color:red;">
+            Пароли не совпадают
+        </p>
+    {% endif %}
+{% endblock %}

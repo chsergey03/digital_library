@@ -3,3 +3,29 @@
 {% block head_title %}
     Электронная библиотека
 {% endblock %}
+
+{% block head_additions %}
+    <script type="text/javascript">
+        window.history.pushState(null, null, window.location.href);
+
+        window.onpopstate = function () {
+            window.history.go(1);
+        };
+    </script>
+{% endblock %}
+
+{% block body %}
+    {% if not authorized %}
+        <p style="text-align: center">
+            <a href="http://127.0.0.1:5000/sign_in">
+                Вход
+            </a>
+        </p>
+    {% else %}
+        <p style="text-align: center">
+            <a href="http://127.0.0.1:5000/log_out">
+                Выход
+            </a>
+        </p>
+    {% endif %}
+{% endblock %}
