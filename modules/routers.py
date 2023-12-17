@@ -82,11 +82,16 @@ def register():
 
 @app.route("/books", methods=["POST", "GET"])
 def books():
+    books_query = Book.select()
+
     if request.method == "POST":
-        title_substr = request.form.get("title_substr")
+        if request.form.get("search_book_button") == "Найти издание":
+            title_substr = request.form.get("title_substr")
 
-        books_table = Book.select().where(Book.title.contains(title_substr))
-    else:
-        books_table = Book.select()
+            books_query = Book.select().where(Book.title.contains(title_substr))
+        elif request.form.get("export_to_json_button") == "Экспорт в JSON":
+            export_data_of_query_to_json(books_query, "books.json")
+        elif request.form.get("export_to_csv_button") == "Экспорт в CSV":
+            export_data_of_query_to_csv(books_query, "books.csv")
 
-    return render_template("books.html", books=books_table)
+    return render_template("books.html", books=books_query)

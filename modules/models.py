@@ -2,6 +2,9 @@ from modules.app import db
 
 from peewee import *
 
+import json
+import csv
+
 
 def add_new_row(model, row_data_dict):
     new_user = model(**row_data_dict)
@@ -11,6 +14,19 @@ def add_new_row(model, row_data_dict):
 
 def is_there_value_of_field(model, field, value):
     return len(model.select().where(getattr(model, field) == value)) != 0
+
+
+def export_data_of_query_to_json(query, filename):
+    with open(filename, "w") as out:
+        json.dump(list(query.dicts()), out)
+
+
+def export_data_of_query_to_csv(query, filename):
+    with open(filename, "w", newline="") as out:
+        csv_out = csv.writer(out)
+
+        for row in query.tuples():
+            csv_out.writerow(row)
 
 
 class BaseModel(Model):
