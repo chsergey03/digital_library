@@ -89,9 +89,18 @@ def books():
             title_substr = request.form.get("title_substr")
 
             books_query = Book.select().where(Book.title.contains(title_substr))
-        elif request.form.get("export_to_json_button") == "Экспорт в JSON":
+        elif (request.form.get("export_to_json_button")
+              == "Экспорт всей таблицы в формат JSON"):
             export_data_of_query_to_json(books_query, "books.json")
-        elif request.form.get("export_to_csv_button") == "Экспорт в CSV":
+        elif (request.form.get("export_to_csv_button")
+              == "Экспорт всей таблицы в формат CSV"):
             export_data_of_query_to_csv(books_query, "books.csv")
 
     return render_template("books.html", books=books_query)
+
+
+@app.route("/users")
+def users():
+    users_query = User.select()
+
+    return render_template("users.html", users=users_query)
