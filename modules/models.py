@@ -62,4 +62,19 @@ class Book(BaseModel):
     genre = ForeignKeyField(Genre, to_field="id")
 
 
-db.create_tables([User, Genre, Book], safe=True)
+class Status_Of_Formular(BaseModel):
+    id = AutoField()
+    code = CharField(max_length=20, null=False, unique=True)
+    name = CharField(max_length=250, null=False, unique=True)
+
+
+class Formular(BaseModel):
+    id = AutoField()
+    reader = ForeignKeyField(User, to_field="id")
+    book = ForeignKeyField(Book, to_field="id")
+    date_of_begin_of_reading = DateField(null=False)
+    date_of_end_of_reading = DateField(null=True)
+    status = ForeignKeyField(Status_Of_Formular, to_field="id")
+
+
+db.create_tables([User, Genre, Book, Status_Of_Formular, Formular], safe=True)

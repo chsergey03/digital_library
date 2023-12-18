@@ -105,3 +105,10 @@ def users():
     users_query = User.select()
 
     return render_template("users.html", users=users_query)
+
+
+@app.route("/formulars")
+def formulars():
+    formulars_query = Formular.select()
+
+    return render_template("formulars.html", formulars=formulars_query)

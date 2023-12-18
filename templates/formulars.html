@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block head_title %}
+    Формуляры
+{% endblock%}
+
+{% block body %}
+    <table id="data"
+           class="table table-striped"
+           border="1"
+           style="border-collapse: collapse"
+           align="center">
+        <thead>
+            <tr>
+                <th>Логин читателя</th>
+                <th>Название книги</th>
+                <th>Дата начала чтения</th>
+                <th>Дата завершения чтения</th>
+                <th>Статус</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for formular in formulars %}
+                <tr>
+                    <td>{{ formular.reader.login }}</td>
+                    <td>{{ formular.book.title }}</td>
+                    <td>{{ formular.date_of_begin_of_reading }}</td>
+                    <td>{{ formular.date_of_end_of_reading }}</td>
+                    <td>{{ formular.status.name }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
