@@ -16,7 +16,7 @@ class FormsNames(StrEnum):
 @app.route("/")
 def index():
     return render_template("index.html",
-                           authorized=request.args.get("authorized"))
+                           authenticated=request.args.get("authenticated"))
 
 
 @app.route("/sign_in", methods=["GET", "POST"])
@@ -34,8 +34,9 @@ def sign_in():
         query_dicts = query.dicts()
 
         if (len(query_dicts) > 0 and
-                checkpw(password_value.encode("utf-8"), query_dicts[0]["password_hash"])):
-            return redirect(url_for("index", authorized=True))
+                checkpw(password_value.encode("utf-8"),
+                        query_dicts[0]["password_hash"])):
+            return redirect(url_for("index", authenticated=True))
         else:
             error = True
 
@@ -72,7 +73,7 @@ def register():
                          "email": email_value,
                          "password_hash": password_hash})
 
-            return redirect(url_for("index", authorized=True))
+            return redirect(url_for("index", authenticated=True))
 
     return render_template("register.html",
                            existing_login=existing_login,
