@@ -1,7 +1,7 @@
 from modules.app import app
 from modules.models import *
 
-from flask import request, render_template, redirect, url_for, session
+from flask import request, render_template, redirect, url_for, session, make_response
 from bcrypt import hashpw, checkpw, gensalt
 from enum import StrEnum
 
@@ -13,14 +13,26 @@ class FormsNames(StrEnum):
     REPEAT_OF_PASSWORD = "repeat_of_password"
 
 
-def init_session(login_value):
+def init_session():
     session["signed_in"] = True
-    session["login"] = login_value
+
+
+def get_response_of_initialized_session(login_value):
+    response = make_response(redirect(url_for("index")))
+    response.set_cookie("login", login_value, 60 * 60 * 24 * 15)
+
+    return response
 
 
 def drop_session():
     session["signed_in"] = False
-    session["login"] = ""
+
+
+def get_response_of_dropped_session():
+    response = make_response(render_template("index.html"))
+    response.set_cookie("login", "", 0)
+
+    return response
 
 
 @app.route("/")
@@ -46,9 +58,9 @@ def sign_in():
         if (len(query_dicts) > 0 and
                 checkpw(password_value.encode("utf-8"),
                         query_dicts[0]["password_hash"])):
-            init_session(login_value)
+            init_session()
 
-            return redirect(url_for("index", authenticated=True))
+            return get_response_of_initialized_session(login_value)
         else:
             error = True
 
@@ -59,7 +71,7 @@ def sign_in():
 def sign_out():
     drop_session()
 
-    return render_template("index.html")
+    return get_response_of_dropped_session()
 
 
 @app.route("/register", methods=["POST", "GET"])
@@ -87,9 +99,9 @@ def register():
                          "email": email_value,
                          "password_hash": password_hash})
 
-            init_session(login_value)
+            init_session()
 
-            return redirect(url_for("index"))
+            return get_response_of_initialized_session(login_value)
 
     return render_template("register.html",
                            existing_login=existing_login,
@@ -97,7 +109,7 @@ def register():
                            mismatched_passwords=mismatched_passwords)
 
 
-@app.route("/books", methods=["POST", "GET"])
+@app.route("/books", methods=["POST"])
 def books():
     books_query = Book.select()
 
@@ -131,6 +143,11 @@ def formulars():
     formulars_query = None
 
     if session.get("signed_in"):
-        formulars_query = Formular.select()
+        user_id = (User
+                   .select(User.id)
+                   .where(User.login == request.cookies.get("login"))
+                   .get())
+
+        formulars_query = Formular.select().where(Formular.reader == user_id)
 
     return render_template("formulars.html", formulars=formulars_query)
