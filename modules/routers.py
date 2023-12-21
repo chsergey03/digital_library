@@ -1,7 +1,7 @@
 from modules.app import app
 from modules.models import *
 
-from flask import request, render_template, redirect, url_for
+from flask import request, render_template, redirect, url_for, session
 from bcrypt import hashpw, checkpw, gensalt
 from enum import StrEnum
 
@@ -13,13 +13,23 @@ class FormsNames(StrEnum):
     REPEAT_OF_PASSWORD = "repeat_of_password"
 
 
+def init_session(login_value):
+    session["signed_in"] = True
+    session["login"] = login_value
+
+
+def drop_session():
+    session["signed_in"] = False
+    session["login"] = ""
+
+
 @app.route("/")
 def index():
     return render_template("index.html",
-                           authenticated=request.args.get("authenticated"))
+                           authenticated=session.get("signed_in"))
 
 
-@app.route("/sign_in", methods=["GET", "POST"])
+@app.route("/sign_in", methods=["POST", "GET"])
 def sign_in():
     error = False
 
@@ -36,6 +46,8 @@ def sign_in():
         if (len(query_dicts) > 0 and
                 checkpw(password_value.encode("utf-8"),
                         query_dicts[0]["password_hash"])):
+            init_session(login_value)
+
             return redirect(url_for("index", authenticated=True))
         else:
             error = True
@@ -43,8 +55,10 @@ def sign_in():
     return render_template("sign_in.html", error=error)
 
 
-@app.route("/log_out")
-def log_out():
+@app.route("/sign_out")
+def sign_out():
+    drop_session()
+
     return render_template("index.html")
 
 
@@ -73,7 +87,9 @@ def register():
                          "email": email_value,
                          "password_hash": password_hash})
 
-            return redirect(url_for("index", authenticated=True))
+            init_session(login_value)
+
+            return redirect(url_for("index"))
 
     return render_template("register.html",
                            existing_login=existing_login,
@@ -102,13 +118,19 @@ def books():
 
 @app.route("/users")
 def users():
-    users_query = User.select()
+    users_query = None
+
+    if session.get("signed_in"):
+        users_query = User.select()
 
     return render_template("users.html", users=users_query)
 
 
 @app.route("/formulars")
 def formulars():
-    formulars_query = Formular.select()
+    formulars_query = None
+
+    if session.get("signed_in"):
+        formulars_query = Formular.select()
 
     return render_template("formulars.html", formulars=formulars_query)
