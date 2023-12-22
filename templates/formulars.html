@@ -13,7 +13,9 @@
                align="center">
             <thead>
                 <tr>
-                    <th>Логин читателя</th>
+                    {% if not reader %}
+                        <th>Логин читателя</th>
+                    {% endif %}
                     <th>Название книги</th>
                     <th>Дата начала чтения</th>
                     <th>Дата завершения чтения</th>
@@ -23,7 +25,9 @@
             <tbody>
                 {% for formular in formulars %}
                     <tr>
-                        <td>{{ formular.reader.login }}</td>
+                        {% if not reader %}
+                            <td>{{ formular.reader.login }}</td>
+                        {% endif %}
                         <td>{{ formular.book.title }}</td>
                         <td>{{ formular.date_of_begin_of_reading }}</td>
                         <td>{{ formular.date_of_end_of_reading }}</td>

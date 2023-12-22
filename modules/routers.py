@@ -1,7 +1,9 @@
 from modules.app import app
 from modules.models import *
 
-from flask import request, render_template, redirect, url_for, session, make_response
+from flask import (request, render_template, redirect,
+                   url_for, session, make_response)
+
 from bcrypt import hashpw, checkpw, gensalt
 from enum import StrEnum
 
@@ -30,14 +32,24 @@ def drop_session():
 
 def get_response_of_dropped_session():
     response = make_response(render_template("index.html"))
-    response.set_cookie("login", "", 0)
+    response.delete_cookie("login")
 
     return response
 
 
 @app.route("/")
 def index():
+    not_reader = False
+
+    if session.get("signed_in") and not session.new:
+        role_code = get_role_code()
+
+        print(role_code)
+
+        not_reader = role_code != "READER"
+
     return render_template("index.html",
+                           not_reader=not_reader,
                            authenticated=session.get("signed_in"))
 
 
@@ -90,14 +102,18 @@ def register():
 
         mismatched_passwords = password_value != repeat_of_password_value
 
-        if (not existing_login) and (not existing_login) and (not mismatched_passwords):
+        if (not existing_login) and (not existing_email) and (not mismatched_passwords):
             salt = gensalt()
             password_hash = hashpw(password_value.encode("utf8"), salt)
 
-            add_new_row(User,
-                        {"login": login_value,
-                         "email": email_value,
-                         "password_hash": password_hash})
+            new_user = add_new_row(User,
+                                   {"login": login_value,
+                                    "email": email_value,
+                                    "password_hash": password_hash})
+
+            add_new_row(Role_Of_User,
+                        {"user": new_user.id,
+                         "role": 3})
 
             init_session()
 
@@ -109,7 +125,7 @@ def register():
                            mismatched_passwords=mismatched_passwords)
 
 
-@app.route("/books", methods=["POST"])
+@app.route("/books", methods=["POST", "GET"])
 def books():
     books_query = Book.select()
 
@@ -132,7 +148,7 @@ def books():
 def users():
     users_query = None
 
-    if session.get("signed_in"):
+    if session.get("signed_in") and get_role_code() != "READER":
         users_query = User.select()
 
     return render_template("users.html", users=users_query)
@@ -141,13 +157,27 @@ def users():
 @app.route("/formulars")
 def formulars():
     formulars_query = None
+    reader = False
 
-    if session.get("signed_in"):
-        user_id = (User
-                   .select(User.id)
-                   .where(User.login == request.cookies.get("login"))
-                   .get())
+    login = request.cookies.get("login")
 
-        formulars_query = Formular.select().where(Formular.reader == user_id)
+    if session.get("signed_in") and login:
+        user_id = User.get(User.login == login).id
 
-    return render_template("formulars.html", formulars=formulars_query)
+        role_code = (Role
+                     .get(Role.id ==
+                          Role_Of_User.get(Role_Of_User.user == user_id).role)
+                     .code)
+
+        if role_code == "READER":
+            reader = True
+
+            formulars_query = (Formular
+                               .select()
+                               .where(Formular.reader == user_id))
+        else:
+            formulars_query = Formular.select()
+
+    return render_template("formulars.html",
+                           reader=reader,
+                           formulars=formulars_query)
