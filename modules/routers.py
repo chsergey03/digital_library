@@ -126,13 +126,18 @@ def books():
 
     book_is_already_favourite = False
 
+    reader = get_role_code() == "READER"
+
     if request.method == "POST":
-        book_id = request.form.get("add_to_favourites")
+        book_id = request.form.get("book_button")
 
         if request.form.get("search_book_button") == "Найти издание":
             title_substr = request.form.get("title_substr")
 
-            books_query = Book.select().where(Book.title.contains(title_substr))
+            books_query = (Book
+                           .select()
+                           .where(Book.title.contains(title_substr)))
+
         elif (request.form.get("export_to_json_button")
               == "Экспорт всей таблицы в формат JSON"):
             export_data_of_query_to_json(books_query, "books.json")
@@ -140,22 +145,25 @@ def books():
               == "Экспорт всей таблицы в формат CSV"):
             export_data_of_query_to_csv(books_query, "books.csv")
         elif book_id:
-            user_id = get_user_by_login().id
+            if reader:
+                user_id = get_user_by_login().id
 
-            query = (Favourites
-                     .select()
-                     .where(Favourites.reader == user_id,
-                            Favourites.book == book_id))
+                query = (Favourites
+                         .select()
+                         .where(Favourites.reader == user_id,
+                                Favourites.book == book_id))
 
-            if len(query.dicts()) == 0:
-                add_new_row(Favourites,
-                            {"reader": user_id,
-                             "book": book_id})
+                if len(query.dicts()) == 0:
+                    add_new_row(Favourites,
+                                {"reader": user_id,
+                                 "book": book_id})
+                else:
+                    book_is_already_favourite = True
             else:
-                book_is_already_favourite = True
+                delete_row_by_id(book_id, Book)
 
     return render_template("books.html",
-                           reader=get_role_code() == "READER",
+                           reader=reader,
                            book_is_already_favourite=book_is_already_favourite,
                            books=books_query)
 

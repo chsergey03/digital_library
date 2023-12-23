@@ -51,14 +51,18 @@ def get_user_by_login():
     return user
 
 
+def delete_row_by_id(row_id, model):
+    row_to_delete = (model
+                     .get(model.id == row_id))
+
+    row_to_delete.delete_instance()
+
+
 def try_to_delete_row_through_form(form_name, model):
     row_id = request.form.get(form_name)
 
     if request.method == "POST" and row_id:
-        row_to_delete = (model
-                         .get(model.id == row_id))
-
-        row_to_delete.delete_instance()
+        delete_row_by_id(row_id, model)
 
 
 class BaseModel(Model):
@@ -104,7 +108,7 @@ class Status_Of_Formular(BaseModel):
 class Formular(BaseModel):
     id = AutoField()
     reader = ForeignKeyField(User, to_field="id")
-    book = ForeignKeyField(Book, to_field="id")
+    book = ForeignKeyField(Book, to_field="id", on_delete="cascade")
     date_of_begin_of_reading = DateField(null=False)
     date_of_end_of_reading = DateField(null=True)
     status = ForeignKeyField(Status_Of_Formular, to_field="id")
@@ -113,7 +117,7 @@ class Formular(BaseModel):
 class Favourites(BaseModel):
     id = AutoField()
     reader = ForeignKeyField(User, to_field="id")
-    book = ForeignKeyField(Book, to_field="id")
+    book = ForeignKeyField(Book, to_field="id", on_delete="cascade")
 
 
 db.create_tables([Role, User,
