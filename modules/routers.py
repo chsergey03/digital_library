@@ -123,13 +123,18 @@ def register():
 @app.route("/books", methods=["POST", "GET"])
 def books():
     books_query = Book.select()
+    genres = None
 
     book_is_already_favourite = False
 
     reader = get_role_code() == "READER"
 
+    if not reader:
+        genres = Genre.select()
+
     if request.method == "POST":
         book_id = request.form.get("book_button")
+        genre_id = request.form.get("genres")
 
         if request.form.get("search_book_button") == "Найти издание":
             title_substr = request.form.get("title_substr")
@@ -158,10 +163,25 @@ def books():
                     book_is_already_favourite = True
             else:
                 delete_row_by_id(book_id, Book)
+        elif genre_id:
+            title = request.form.get("title")
+            author = request.form.get("author")
+            publisher = request.form.get("publisher")
+            release_year = request.form.get("release_year")
+
+            add_new_row(Book,
+                        {"title": title,
+                         "author": author,
+                         "publisher": publisher,
+                         "release_year": release_year,
+                         "genre": genre_id})
+
+            books_query = Book.select()
 
     return render_template("books.html",
                            reader=reader,
                            book_is_already_favourite=book_is_already_favourite,
+                           genres=genres,
                            books=books_query)
 
 

@@ -83,4 +83,77 @@
             Издание уже в избранном
         </p>
     {% endif %}
+
+    {% if not reader %}
+        <p style="text-align: center">
+            Добавить издание
+        </p>
+
+        <form action="" method="post">
+            <p style="text-align: center">
+                <label for="title">
+                    Название
+                </label>
+
+                <input type="text"
+                       id="title"
+                       name="title"
+                       size="30"
+                       required/>
+            </p>
+
+            <p style="text-align: center">
+                <label for="author">
+                    Ф.И.О. автора
+                </label>
+
+                <input type="text"
+                       id="author"
+                       name="author"
+                       size="30"
+                       required/>
+            </p>
+
+            <p style="text-align: center">
+                <label for="publisher">
+                    Издатель
+                </label>
+
+                <input type="text"
+                       id="publisher"
+                       name="publisher"
+                       size="30"
+                       required/>
+            </p>
+
+            <p style="text-align: center">
+                <label for="release_year">
+                    Год выпуска
+                </label>
+
+                <input type="text"
+                       id="release_year"
+                       name="release_year"
+                       size="30"
+                       required/>
+            </p>
+
+            <p style="text-align: center">
+                <label for="genres">
+                    Жанр
+                </label>
+
+                <select name="genres" id="genres">
+                    {% for genre in genres %}
+                        <option value="{{ genre.id }}">{{ genre.name }}</option>
+                    {% endfor %}
+                </select>
+            </p>
+
+            <p style="text-align: center">
+                <input type="submit"
+                       value="Добавить издание">
+            </p>
+        </form>
+    {% endif %}
 {% endblock %}
