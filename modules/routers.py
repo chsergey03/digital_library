@@ -124,6 +124,8 @@ def register():
 def books():
     books_query = Book.select()
 
+    book_is_already_favourite = False
+
     if request.method == "POST":
         book_id = request.form.get("add_to_favourites")
 
@@ -149,9 +151,12 @@ def books():
                 add_new_row(Favourites,
                             {"reader": user_id,
                              "book": book_id})
+            else:
+                book_is_already_favourite = True
 
     return render_template("books.html",
                            reader=get_role_code() == "READER",
+                           book_is_already_favourite=book_is_already_favourite,
                            books=books_query)
 
 
@@ -168,7 +173,7 @@ def users():
                            users=users_query)
 
 
-@app.route("/formulars")
+@app.route("/formulars", methods=["POST", "GET"])
 def formulars():
     formulars_query = None
     reader = False
@@ -189,6 +194,9 @@ def formulars():
                                .select()
                                .where(Formular.reader == user.id))
         else:
+            try_to_delete_row_through_form("delete_formular",
+                                           Formular)
+
             formulars_query = Formular.select()
 
     return render_template("formulars.html",
@@ -201,13 +209,8 @@ def favourites():
     favourites_query = None
 
     if get_role_code() == "READER":
-        favourite_row_id = request.form.get("delete_from_favourites")
-
-        if request.method == "POST" and favourite_row_id:
-            favourite_to_delete = (Favourites
-                                   .get(Favourites.id == favourite_row_id))
-
-            favourite_to_delete.delete_instance()
+        try_to_delete_row_through_form("delete_from_favourites",
+                                       Favourites)
 
         favourites_query = (Favourites
                             .select()

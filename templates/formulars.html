@@ -38,6 +38,17 @@
                         <td>{{ formular.date_of_begin_of_reading }}</td>
                         <td>{{ formular.date_of_end_of_reading }}</td>
                         <td>{{ formular.status.name }}</td>
+                        {% if not reader %}
+                            <td>
+                                <form action="" method="post">
+                                    <button type="submit"
+                                            name="delete_formular"
+                                            value="{{ formular.id }}">
+                                        Удалить
+                                    </button>
+                                </form>
+                            </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             </tbody>

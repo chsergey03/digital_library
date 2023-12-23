@@ -75,4 +75,10 @@
             {% endfor %}
         </tbody>
     </table>
+
+    {% if book_is_already_favourite%}
+        <p style="text-align: center; color:red">
+            Издание уже в избранном
+        </p>
+    {% endif %}
 {% endblock %}

@@ -51,6 +51,16 @@ def get_user_by_login():
     return user
 
 
+def try_to_delete_row_through_form(form_name, model):
+    row_id = request.form.get(form_name)
+
+    if request.method == "POST" and row_id:
+        row_to_delete = (model
+                         .get(model.id == row_id))
+
+        row_to_delete.delete_instance()
+
+
 class BaseModel(Model):
     class Meta:
         database = db
