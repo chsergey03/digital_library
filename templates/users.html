@@ -15,6 +15,7 @@
                 <tr>
                     <th>Логин</th>
                     <th>Адрес электронной почты</th>
+                    <th>Роль пользователя</th>
                 </tr>
             </thead>
             <tbody>
@@ -22,6 +23,7 @@
                     <tr>
                         <td>{{ user.login }}</td>
                         <td>{{ user.email }}</td>
+                        <td>{{ user.role.name }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

@@ -44,8 +44,6 @@ def index():
     if session.get("signed_in") and not session.new:
         role_code = get_role_code()
 
-        print(role_code)
-
         not_reader = role_code != "READER"
 
     return render_template("index.html",
@@ -106,13 +104,10 @@ def register():
             salt = gensalt()
             password_hash = hashpw(password_value.encode("utf8"), salt)
 
-            new_user = add_new_row(User,
-                                   {"login": login_value,
-                                    "email": email_value,
-                                    "password_hash": password_hash})
-
-            add_new_row(Role_Of_User,
-                        {"user": new_user.id,
+            add_new_row(User,
+                        {"login": login_value,
+                         "email": email_value,
+                         "password_hash": password_hash,
                          "role": 3})
 
             init_session()
@@ -148,10 +143,13 @@ def books():
 def users():
     users_query = None
 
-    if session.get("signed_in") and get_role_code() != "READER":
+    role_code = get_role_code()
+
+    if session.get("signed_in") and role_code != "READER":
         users_query = User.select()
 
-    return render_template("users.html", users=users_query)
+    return render_template("users.html",
+                           users=users_query)
 
 
 @app.route("/formulars")
@@ -162,11 +160,13 @@ def formulars():
     login = request.cookies.get("login")
 
     if session.get("signed_in") and login:
-        user_id = User.get(User.login == login).id
+        user = User.get(User.login == login)
+
+        user_id = user.id
+        user_role = user.role
 
         role_code = (Role
-                     .get(Role.id ==
-                          Role_Of_User.get(Role_Of_User.user == user_id).role)
+                     .get(Role.id == user_role)
                      .code)
 
         if role_code == "READER":
