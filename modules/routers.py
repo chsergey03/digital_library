@@ -41,7 +41,7 @@ def get_response_of_dropped_session():
 def index():
     not_reader = False
 
-    if session.get("signed_in") and not session.new:
+    if session.get("signed_in"):
         role_code = get_role_code()
 
         not_reader = role_code != "READER"
@@ -134,10 +134,7 @@ def books():
         if request.form.get("search_book_button") == "Найти издание":
             title_substr = request.form.get("title_substr")
 
-            books_query = (Book
-                           .select()
-                           .where(Book.title.contains(title_substr)))
-
+            books_query = Book.select().where(Book.title.contains(title_substr))
         elif (request.form.get("export_to_json_button")
               == "Экспорт всей таблицы в формат JSON"):
             export_data_of_query_to_json(books_query, "books.json")
@@ -172,23 +169,30 @@ def books():
 def users():
     users_query = None
 
-    role_code = get_role_code()
+    guest = True
 
-    if session.get("signed_in") and role_code != "READER":
+    if session.get("signed_in") and get_role_code() != "READER":
+        guest = False
+
         users_query = User.select()
 
     return render_template("users.html",
+                           guest=guest,
                            users=users_query)
 
 
 @app.route("/formulars", methods=["POST", "GET"])
 def formulars():
     formulars_query = None
+
+    guest = True
     reader = False
 
     login = get_login_from_cookies()
 
     if session.get("signed_in") and login:
+        guest = False
+
         user = get_user_by_login()
 
         role_code = (Role
@@ -208,6 +212,7 @@ def formulars():
             formulars_query = Formular.select()
 
     return render_template("formulars.html",
+                           guest=guest,
                            reader=reader,
                            formulars=formulars_query)
 
@@ -216,13 +221,27 @@ def formulars():
 def favourites():
     favourites_query = None
 
-    if get_role_code() == "READER":
+    guest = True
+    reader = False
+
+    if session.get("signed_in"):
+        guest = False
+
+        role_code = get_role_code()
+
         try_to_delete_row_through_form("delete_from_favourites",
                                        Favourites)
 
-        favourites_query = (Favourites
-                            .select()
-                            .where(Favourites.reader == get_user_by_login().id))
+        if role_code == "READER":
+            reader = True
+
+            favourites_query = (Favourites
+                                .select()
+                                .where(Favourites.reader == get_user_by_login().id))
+        else:
+            favourites_query = Favourites.select()
 
     return render_template("favourites.html",
+                           guest=guest,
+                           reader=reader,
                            favourites=favourites_query)

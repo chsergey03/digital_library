@@ -5,13 +5,25 @@
 {% endblock%}
 
 {% block body %}
-    <p style="text-align: center">
-        <a href="http://127.0.0.1:5000">
-            ←
-        </a>
-    </p>
+    {% if guest%}
+        <p style="text-align: center; color:red">
+            Данную страницу могут просматривать только
+            авторизованные пользователи, имеющие
+            соответствующие права
+        </p>
 
-    {% if favourites %}
+        <p style="text-align: center">
+            <a href="http://127.0.0.1:5000/sign_in">
+                Авторизоваться
+            </a>
+        </p>
+    {% else %}
+        <p style="text-align: center">
+            <a href="http://127.0.0.1:5000">
+                ←
+            </a>
+        </p>
+
         <table id="data"
                class="table table-striped"
                border="1"
@@ -19,6 +31,9 @@
                align="center">
             <thead>
                 <tr>
+                    {% if not reader %}
+                        <th>Логин читателя</th>
+                    {% endif %}
                     <th>Название</th>
                     <th>Ф.И.О. автора</th>
                     <th>Издательство</th>
@@ -29,6 +44,9 @@
             <tbody>
                 {% for favourite in favourites %}
                     <tr>
+                        {% if not reader %}
+                            <td>{{ favourite.reader.login }}</td>
+                        {% endif %}
                         <td>{{ favourite.book.title }}</td>
                         <td>{{ favourite.book.author }}</td>
                         <td>{{ favourite.book.publisher }}</td>
