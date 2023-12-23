@@ -5,6 +5,12 @@
 {% endblock%}
 
 {% block body %}
+    <p style="text-align: center">
+        <a href="http://127.0.0.1:5000">
+            ←
+        </a>
+    </p>
+
     <form action="" method="post">
         <p style="text-align: center">
             <label for="title_substr"></label>
@@ -54,6 +60,17 @@
                     <td>{{ book.publisher }}</td>
                     <td>{{ book.release_year }}</td>
                     <td>{{ book.genre.name }}</td>
+                    {% if reader %}
+                        <td>
+                            <form action="" method="post">
+                                <button type="submit"
+                                        name="add_to_favourites"
+                                        value="{{ book.id }}">
+                                    В избранное
+                                </button>
+                            </form>
+                        </td>
+                    {% endif %}
                 </tr>
             {% endfor %}
         </tbody>

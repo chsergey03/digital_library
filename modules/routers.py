@@ -125,6 +125,8 @@ def books():
     books_query = Book.select()
 
     if request.method == "POST":
+        book_id = request.form.get("add_to_favourites")
+
         if request.form.get("search_book_button") == "Найти издание":
             title_substr = request.form.get("title_substr")
 
@@ -135,8 +137,22 @@ def books():
         elif (request.form.get("export_to_csv_button")
               == "Экспорт всей таблицы в формат CSV"):
             export_data_of_query_to_csv(books_query, "books.csv")
+        elif book_id:
+            user_id = get_user_by_login().id
 
-    return render_template("books.html", books=books_query)
+            query = (Favourites
+                     .select()
+                     .where(Favourites.reader == user_id,
+                            Favourites.book == book_id))
+
+            if len(query.dicts()) == 0:
+                add_new_row(Favourites,
+                            {"reader": user_id,
+                             "book": book_id})
+
+    return render_template("books.html",
+                           reader=get_role_code() == "READER",
+                           books=books_query)
 
 
 @app.route("/users")
@@ -157,16 +173,13 @@ def formulars():
     formulars_query = None
     reader = False
 
-    login = request.cookies.get("login")
+    login = get_login_from_cookies()
 
     if session.get("signed_in") and login:
-        user = User.get(User.login == login)
-
-        user_id = user.id
-        user_role = user.role
+        user = get_user_by_login()
 
         role_code = (Role
-                     .get(Role.id == user_role)
+                     .get(Role.id == user.role)
                      .code)
 
         if role_code == "READER":
@@ -174,10 +187,31 @@ def formulars():
 
             formulars_query = (Formular
                                .select()
-                               .where(Formular.reader == user_id))
+                               .where(Formular.reader == user.id))
         else:
             formulars_query = Formular.select()
 
     return render_template("formulars.html",
                            reader=reader,
                            formulars=formulars_query)
+
+
+@app.route("/favourites", methods=["POST", "GET"])
+def favourites():
+    favourites_query = None
+
+    if get_role_code() == "READER":
+        favourite_row_id = request.form.get("delete_from_favourites")
+
+        if request.method == "POST" and favourite_row_id:
+            favourite_to_delete = (Favourites
+                                   .get(Favourites.id == favourite_row_id))
+
+            favourite_to_delete.delete_instance()
+
+        favourites_query = (Favourites
+                            .select()
+                            .where(Favourites.reader == get_user_by_login().id))
+
+    return render_template("favourites.html",
+                           favourites=favourites_query)

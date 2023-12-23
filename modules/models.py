@@ -29,15 +29,26 @@ def export_data_of_query_to_csv(query, filename):
             csv_out.writerow(row)
 
 
+def get_login_from_cookies():
+    return request.cookies.get("login")
+
+
 def get_role_code():
-    login = request.cookies.get("login")
-    user_role = User.get(User.login == login).role
+    user_role = (User
+                 .get(User.login == get_login_from_cookies())
+                 .role)
 
     role_code = (Role
                  .get(Role.id == user_role)
                  .code)
 
     return role_code
+
+
+def get_user_by_login():
+    user = User.get(User.login == get_login_from_cookies())
+
+    return user
 
 
 class BaseModel(Model):
@@ -89,8 +100,16 @@ class Formular(BaseModel):
     status = ForeignKeyField(Status_Of_Formular, to_field="id")
 
 
+class Favourites(BaseModel):
+    id = AutoField()
+    reader = ForeignKeyField(User, to_field="id")
+    book = ForeignKeyField(Book, to_field="id")
+
+
 db.create_tables([Role, User,
-                  Genre, Book, Status_Of_Formular, Formular], safe=True)
+                  Genre, Book,
+                  Status_Of_Formular, Formular,
+                  Favourites], safe=True)
 
 if not Role.select().count():
     add_new_row(Role,

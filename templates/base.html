@@ -4,7 +4,13 @@
     <meta charset="UTF-8">
     <title>{% block head_title %}{% endblock %}</title>
 
-    {% block head_additions %}{% endblock %}
+    <script type="text/javascript">
+        window.history.pushState(null, null, window.location.href);
+
+        window.onpopstate = function () {
+            window.history.go(1);
+        };
+    </script>
 </head>
 <body>
     <h1 style="text-align: center">

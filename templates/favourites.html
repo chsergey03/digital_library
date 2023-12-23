@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block head_title %}
+    Избранное
+{% endblock%}
+
+{% block body %}
+    <p style="text-align: center">
+        <a href="http://127.0.0.1:5000">
+            ←
+        </a>
+    </p>
+
+    {% if favourites %}
+        <table id="data"
+               class="table table-striped"
+               border="1"
+               style="border-collapse: collapse"
+               align="center">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Ф.И.О. автора</th>
+                    <th>Издательство</th>
+                    <th>Год выпуска</th>
+                    <th>Жанр</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for favourite in favourites %}
+                    <tr>
+                        <td>{{ favourite.book.title }}</td>
+                        <td>{{ favourite.book.author }}</td>
+                        <td>{{ favourite.book.publisher }}</td>
+                        <td>{{ favourite.book.release_year }}</td>
+                        <td>{{ favourite.book.genre.name }}</td>
+                        <td>
+                            <form action="" method="post">
+                                <button type="submit"
+                                        name="delete_from_favourites"
+                                        value="{{ favourite.id }}">
+                                    Удалить
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+{% endblock %}
