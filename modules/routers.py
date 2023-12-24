@@ -176,8 +176,9 @@ def books():
             else:
                 delete_row_by_id(book_id, Book)
         elif book_to_edit_id:
-            return redirect(url_for("books",
-                                    book_to_edit_id_request_arg=book_to_edit_id))
+            return redirect(url_for(
+                "books",
+                book_to_edit_id_request_arg=book_to_edit_id))
         elif book_to_edit_id_request_arg:
             update_row(Book,
                        book_to_edit_id_request_arg,
@@ -187,8 +188,9 @@ def books():
                         "release_year": release_year,
                         "genre": genre_id})
 
-            return redirect(url_for("books",
-                                    book_to_edit_id_request_arg=None))
+            return redirect(url_for(
+                "books",
+                book_to_edit_id_request_arg=None))
         elif genre_id:
             add_new_row(Book,
                         {"title": title,
@@ -199,12 +201,13 @@ def books():
 
             books_query = Book.select()
 
-    return render_template("books.html",
-                           reader=reader,
-                           book_is_already_favourite=book_is_already_favourite,
-                           genres=genres,
-                           book_to_edit=book_to_edit,
-                           books=books_query)
+    return render_template(
+        "books.html",
+        reader=reader,
+        book_is_already_favourite=book_is_already_favourite,
+        genres=genres,
+        book_to_edit=book_to_edit,
+        books=books_query)
 
 
 @app.route("/users")
@@ -287,3 +290,28 @@ def favourites():
                            guest=guest,
                            reader=reader,
                            favourites=favourites_query)
+
+
+@app.route("/genres")
+@app.route("/roles")
+@app.route("/statuses_of_formular")
+def ref():
+    ref_query = None
+
+    guest = True
+
+    if session.get("signed_in") and get_role_code() != "READER":
+        guest = False
+
+        if "genres" in request.path:
+            model = Genre
+        elif "roles" in request.path:
+            model = Role
+        else:
+            model = Status_Of_Formular
+
+        ref_query = model.select()
+
+    return render_template("ref.html",
+                           guest=guest,
+                           ref=ref_query)
