@@ -42,9 +42,48 @@
                         <td>{{ user.login }}</td>
                         <td>{{ user.email }}</td>
                         <td>{{ user.role.name }}</td>
+                        <td>
+                            <form action="" method="post">
+                                <button type="submit"
+                                        name="edit_user_role_button"
+                                        value="{{ user.id }}">
+                                    Изменить роль
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
+
+        {% if user_role_to_edit %}
+            <p style="text-align: center">
+                Изменить роль
+            </p>
+
+            <form action="" method="post">
+                <p style="text-align: center">
+                    <label for="roles">
+                        Новая роль:
+                    </label>
+
+
+                    <select name="roles" id="roles">
+                        <option value="">Выбрать новую роль</option>
+                        {% for role in roles %}
+                            <option value="{{ role.id }}">{{ role.name }}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+
+                <p style="text-align: center">
+                <button type="submit"
+                        name="enter"
+                        value="1">
+                    Ок
+                </button>
+            </p>
+            </form>
+        {% endif %}
     {% endif %}
 {% endblock %}

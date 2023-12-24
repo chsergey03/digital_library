@@ -221,21 +221,59 @@ def books():
         books=books_query)
 
 
-@app.route("/users")
+@app.route("/users", methods=["POST", "GET"])
 def users():
     users_query = None
+    roles_query = None
 
     guest = True
+    user_role_to_edit = False
 
-    if session.get("signed_in") and get_role_code() != "READER":
+    if session.get("signed_in") and get_role_code() == "ADMIN":
         guest = False
 
-        user_id = get_user_by_login().id
+        user_role_to_edit_id_request_arg = (
+            request.args.get("user_role_to_edit_id_request_arg"))
 
-        users_query = User.select().where(User.id != user_id)
+        if user_role_to_edit_id_request_arg:
+            users_query = (User
+                           .select()
+                           .where(User.id == user_role_to_edit_id_request_arg))
+
+            user_which_role_is_edited = User.get(User.id == user_role_to_edit_id_request_arg)
+
+            roles_query = Role.select().where(Role.id != user_which_role_is_edited.role)
+
+            user_role_to_edit = True
+        else:
+            user = get_user_by_login()
+
+            users_query = User.select().where(User.id != user.id)
+
+            user_role_to_edit = False
+
+        if request.method == "POST":
+            user_role_to_edit_id = request.form.get("edit_user_role_button")
+
+            if user_role_to_edit_id:
+                return redirect(url_for(
+                    "users",
+                    user_role_to_edit_id_request_arg=user_role_to_edit_id))
+            elif user_role_to_edit_id_request_arg:
+                role_id = request.form.get("roles")
+
+                update_row(User,
+                           user_role_to_edit_id_request_arg,
+                           {"role": role_id})
+
+                return redirect(url_for(
+                    "users",
+                    user_role_to_edit_id_request_arg=None))
 
     return render_template("users.html",
                            guest=guest,
+                           user_role_to_edit=user_role_to_edit,
+                           roles=roles_query,
                            users=users_query)
 
 
