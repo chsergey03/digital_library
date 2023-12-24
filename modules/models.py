@@ -12,6 +12,28 @@ def add_new_row(model, row_data_dict):
     new_row.save()
 
 
+def delete_row_by_id(row_id, model):
+    row_to_delete = (model
+                     .get(model.id == row_id))
+
+    row_to_delete.delete_instance()
+
+
+def try_to_delete_row_through_form(form_name, model):
+    row_id = request.form.get(form_name)
+
+    if request.method == "POST" and row_id:
+        delete_row_by_id(row_id, model)
+
+
+def update_row(model, row_id, row_new_data_dict):
+    new_row = (model
+               .update(**row_new_data_dict)
+               .where(model.id == row_id))
+
+    new_row.execute()
+
+
 def is_there_value_of_field(model, field, value):
     return len(model.select().where(getattr(model, field) == value)) != 0
 
@@ -49,20 +71,6 @@ def get_user_by_login():
     user = User.get(User.login == get_login_from_cookies())
 
     return user
-
-
-def delete_row_by_id(row_id, model):
-    row_to_delete = (model
-                     .get(model.id == row_id))
-
-    row_to_delete.delete_instance()
-
-
-def try_to_delete_row_through_form(form_name, model):
-    row_id = request.form.get(form_name)
-
-    if request.method == "POST" and row_id:
-        delete_row_by_id(row_id, model)
 
 
 class BaseModel(Model):

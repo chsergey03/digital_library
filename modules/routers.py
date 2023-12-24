@@ -122,29 +122,41 @@ def register():
 
 @app.route("/books", methods=["POST", "GET"])
 def books():
-    books_query = Book.select()
-    genres = None
+    book_to_edit_id_request_arg = request.args.get("book_to_edit_id_request_arg")
+
+    if book_to_edit_id_request_arg:
+        books_query = (Book
+                       .select()
+                       .where(Book.id == book_to_edit_id_request_arg))
+
+        book_to_edit = True
+    else:
+        books_query = Book.select()
+
+        book_to_edit = False
 
     book_is_already_favourite = False
 
     reader = get_role_code() == "READER"
 
-    if not reader:
-        genres = Genre.select()
+    genres = Genre.select() if not reader else None
 
     if request.method == "POST":
         book_id = request.form.get("book_button")
+        book_to_edit_id = request.form.get("edit_book_button")
+
+        title = request.form.get("title")
+        author = request.form.get("author")
+        publisher = request.form.get("publisher")
+        release_year = request.form.get("release_year")
         genre_id = request.form.get("genres")
 
-        if request.form.get("search_book_button") == "Найти издание":
+        if request.form.get("search_book_button"):
             title_substr = request.form.get("title_substr")
-
             books_query = Book.select().where(Book.title.contains(title_substr))
-        elif (request.form.get("export_to_json_button")
-              == "Экспорт всей таблицы в формат JSON"):
+        elif request.form.get("export_to_json_button"):
             export_data_of_query_to_json(books_query, "books.json")
-        elif (request.form.get("export_to_csv_button")
-              == "Экспорт всей таблицы в формат CSV"):
+        elif request.form.get("export_to_csv_button"):
             export_data_of_query_to_csv(books_query, "books.csv")
         elif book_id:
             if reader:
@@ -163,12 +175,21 @@ def books():
                     book_is_already_favourite = True
             else:
                 delete_row_by_id(book_id, Book)
-        elif genre_id:
-            title = request.form.get("title")
-            author = request.form.get("author")
-            publisher = request.form.get("publisher")
-            release_year = request.form.get("release_year")
+        elif book_to_edit_id:
+            return redirect(url_for("books",
+                                    book_to_edit_id_request_arg=book_to_edit_id))
+        elif book_to_edit_id_request_arg:
+            update_row(Book,
+                       book_to_edit_id_request_arg,
+                       {"title": title,
+                        "author": author,
+                        "publisher": publisher,
+                        "release_year": release_year,
+                        "genre": genre_id})
 
+            return redirect(url_for("books",
+                                    book_to_edit_id_request_arg=None))
+        elif genre_id:
             add_new_row(Book,
                         {"title": title,
                          "author": author,
@@ -182,6 +203,7 @@ def books():
                            reader=reader,
                            book_is_already_favourite=book_is_already_favourite,
                            genres=genres,
+                           book_to_edit=book_to_edit,
                            books=books_query)
 
 

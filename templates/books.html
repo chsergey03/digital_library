@@ -20,21 +20,27 @@
                    name="title_substr"
                    size="30"/>
 
-            <input type="submit"
+            <button type="submit"
                    name="search_book_button"
-                   value="Найти издание">
+                   value="1">
+                Найти издание
+            </button>
         </p>
     </form>
 
     <form action="" method="post">
         <p style="text-align: center">
-            <input type="submit"
+            <button type="submit"
                    name="export_to_json_button"
-                   value="Экспорт всей таблицы в формат JSON">
+                   value="2">
+                Экспорт всей таблицы в формат JSON
+            </button>
 
-            <input type="submit"
+            <button type="submit"
                    name="export_to_csv_button"
-                   value="Экспорт всей таблицы в формат CSV">
+                   value="3">
+                Экспорт всей таблицы в формат CSV
+            </button>
         </p>
     </form>
 
@@ -60,25 +66,38 @@
                     <td>{{ book.publisher }}</td>
                     <td>{{ book.release_year }}</td>
                     <td>{{ book.genre.name }}</td>
-                    <td>
-                        <form action="" method="post">
-                            <button type="submit"
-                                    name="book_button"
-                                    value="{{ book.id }}">
-                                {% if reader %}
-                                    В избранное
-                                {% else %}
-                                    Удалить
-                                {% endif %}
-                            </button>
-                        </form>
-                    </td>
+                    {% if not book_to_edit %}
+                        <td>
+                            <form action="" method="post">
+                                <button type="submit"
+                                        name="book_button"
+                                        value="{{ book.id }}">
+                                    {% if reader %}
+                                        В избранное
+                                    {% else %}
+                                        Удалить
+                                    {% endif %}
+                                </button>
+                            </form>
+                        </td>
+                        {% if not reader %}
+                            <td>
+                                <form action="" method="post">
+                                    <button type="submit"
+                                            name="edit_book_button"
+                                            value="{{ book.id }}">
+                                        Изменить
+                                    </button>
+                                </form>
+                            </td>
+                        {% endif %}
+                    {% endif %}
                 </tr>
             {% endfor %}
         </tbody>
     </table>
 
-    {% if book_is_already_favourite%}
+    {% if book_is_already_favourite %}
         <p style="text-align: center; color:red">
             Издание уже в избранном
         </p>
@@ -86,7 +105,12 @@
 
     {% if not reader %}
         <p style="text-align: center">
-            Добавить издание
+            {% if book_to_edit %}
+                Изменить
+            {% else %}
+                Добавить
+            {% endif %}
+            издание
         </p>
 
         <form action="" method="post">
@@ -151,8 +175,10 @@
             </p>
 
             <p style="text-align: center">
-                <input type="submit"
-                       value="Добавить издание">
+                <button type="submit"
+                        value="4">
+                    Ок
+                </button>>
             </p>
         </form>
     {% endif %}
