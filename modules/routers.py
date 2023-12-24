@@ -303,14 +303,27 @@ def genres():
     guest = True
     existing_code_or_name = False
     genre_cannot_be_deleted = False
+    genre_to_edit = False
 
     if session.get("signed_in") and get_role_code() != "READER":
         guest = False
 
-        genres_query = Genre.select()
+        genre_to_edit_id_request_arg = request.args.get("genre_to_edit_id_request_arg")
+
+        if genre_to_edit_id_request_arg:
+            genres_query = (Genre
+                            .select()
+                            .where(Genre.id == genre_to_edit_id_request_arg))
+
+            genre_to_edit = True
+        else:
+            genres_query = Genre.select()
+
+            genre_to_edit = False
 
         if request.method == "POST":
             genre_to_delete_id = request.form.get("delete_genre_button")
+            genre_to_edit_id = request.form.get("edit_genre_button")
 
             code = request.form.get("code")
             name = request.form.get("name")
@@ -327,14 +340,39 @@ def genres():
                     delete_row_by_id(genre_to_delete_id, Genre)
                 else:
                     genre_cannot_be_deleted = True
-            elif not existing_code_or_name:
-                if request.form.get("enter"):
-                    add_new_row(Genre,
-                                {"code": code,
-                                 "name": name})
+            elif genre_to_edit_id:
+                return redirect(url_for(
+                    "genres",
+                    genre_to_edit_id_request_arg=genre_to_edit_id))
+            elif genre_to_edit_id_request_arg:
+                existing_code_not_in_this_row = (
+                    is_there_value_of_field_not_in_this_row(
+                        Genre, "code", code, genre_to_edit_id_request_arg))
+
+                existing_name_not_in_this_row = (
+                    is_there_value_of_field_not_in_this_row(
+                        Genre, "name", name, genre_to_edit_id_request_arg))
+
+                existing_code_or_name_not_in_this_row = (
+                        existing_code_not_in_this_row or existing_name_not_in_this_row)
+
+                if not existing_code_or_name_not_in_this_row:
+                    update_row(Genre,
+                               genre_to_edit_id_request_arg,
+                               {"code": code,
+                                "name": name})
+
+                    return redirect(url_for(
+                        "genres",
+                        genre_to_edit_id_request_arg=None))
+            elif not existing_code_or_name and request.form.get("enter"):
+                add_new_row(Genre,
+                            {"code": code,
+                             "name": name})
 
     return render_template("genres.html",
                            guest=guest,
                            existing_code_or_name=existing_code_or_name,
                            genre_cannot_be_deleted=genre_cannot_be_deleted,
+                           genre_to_edit=genre_to_edit,
                            genres=genres_query)

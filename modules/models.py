@@ -38,6 +38,12 @@ def is_there_value_of_field(model, field, value):
     return len(model.select().where(getattr(model, field) == value)) != 0
 
 
+def is_there_value_of_field_not_in_this_row(model, field, value, row_id):
+    return len(model
+               .select()
+               .where(getattr(model, field) == value, model.id != row_id)) != 0
+
+
 def export_data_of_query_to_json(query, filename):
     with open(filename, "w") as out:
         json.dump(list(query.dicts()), out)
