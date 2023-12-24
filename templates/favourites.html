@@ -31,9 +31,6 @@
                align="center">
             <thead>
                 <tr>
-                    {% if not reader %}
-                        <th>Логин читателя</th>
-                    {% endif %}
                     <th>Название</th>
                     <th>Ф.И.О. автора</th>
                     <th>Издательство</th>
@@ -44,9 +41,6 @@
             <tbody>
                 {% for favourite in favourites %}
                     <tr>
-                        {% if not reader %}
-                            <td>{{ favourite.reader.login }}</td>
-                        {% endif %}
                         <td>{{ favourite.book.title }}</td>
                         <td>{{ favourite.book.author }}</td>
                         <td>{{ favourite.book.publisher }}</td>

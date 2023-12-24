@@ -30,28 +30,13 @@
                     Жанры
                 </a>
             </p>
-
+        {% else %}
             <p style="text-align: center">
-                <a href="http://127.0.0.1:5000/roles">
-                    Роли
-                </a>
-            </p>
-
-            <p style="text-align: center">
-                <a href="http://127.0.0.1:5000/statuses_of_formular">
-                    Статусы формуляра
+                <a href="http://127.0.0.1:5000/favourites">
+                    Избранное
                 </a>
             </p>
         {% endif %}
-
-        <p style="text-align: center">
-            <a href="http://127.0.0.1:5000/favourites">
-                Избранное
-                {% if not_reader %}
-                    читателей
-                {% endif %}
-            </a>
-        </p>
 
         <p style="text-align: center">
             <a href="http://127.0.0.1:5000/formulars">

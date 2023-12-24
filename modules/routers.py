@@ -136,10 +136,12 @@ def books():
         book_to_edit = False
 
     book_is_already_favourite = False
+    add_book_without_genre = False
+    book_cannot_be_deleted = False
 
     reader = get_role_code() == "READER"
 
-    genres = Genre.select() if not reader else None
+    genres_query = Genre.select() if not reader else None
 
     if request.method == "POST":
         book_id = request.form.get("book_button")
@@ -174,7 +176,13 @@ def books():
                 else:
                     book_is_already_favourite = True
             else:
-                delete_row_by_id(book_id, Book)
+                id_in_favourites = is_there_value_of_field(Favourites, "book", book_id)
+                id_in_formulars = is_there_value_of_field(Formular, "book", book_id)
+
+                if (not id_in_formulars) and (not id_in_favourites):
+                    delete_row_by_id(book_id, Book)
+                else:
+                    book_cannot_be_deleted = True
         elif book_to_edit_id:
             return redirect(url_for(
                 "books",
@@ -191,22 +199,25 @@ def books():
             return redirect(url_for(
                 "books",
                 book_to_edit_id_request_arg=None))
-        elif genre_id:
-            add_new_row(Book,
-                        {"title": title,
-                         "author": author,
-                         "publisher": publisher,
-                         "release_year": release_year,
-                         "genre": genre_id})
-
-            books_query = Book.select()
+        elif request.form.get("enter"):
+            if genre_id:
+                add_new_row(Book,
+                            {"title": title,
+                             "author": author,
+                             "publisher": publisher,
+                             "release_year": release_year,
+                             "genre": genre_id})
+            else:
+                add_book_without_genre = True
 
     return render_template(
         "books.html",
         reader=reader,
         book_is_already_favourite=book_is_already_favourite,
-        genres=genres,
+        add_book_without_genre=add_book_without_genre,
+        book_cannot_be_deleted=book_cannot_be_deleted,
         book_to_edit=book_to_edit,
+        genres=genres_query,
         books=books_query)
 
 
@@ -219,7 +230,9 @@ def users():
     if session.get("signed_in") and get_role_code() != "READER":
         guest = False
 
-        users_query = User.select()
+        user_id = get_user_by_login().id
+
+        users_query = User.select().where(User.id != user_id)
 
     return render_template("users.html",
                            guest=guest,
@@ -267,51 +280,61 @@ def favourites():
     favourites_query = None
 
     guest = True
-    reader = False
 
-    if session.get("signed_in"):
+    if session.get("signed_in") and get_role_code() == "READER":
         guest = False
-
-        role_code = get_role_code()
 
         try_to_delete_row_through_form("delete_from_favourites",
                                        Favourites)
 
-        if role_code == "READER":
-            reader = True
-
-            favourites_query = (Favourites
-                                .select()
-                                .where(Favourites.reader == get_user_by_login().id))
-        else:
-            favourites_query = Favourites.select()
+        favourites_query = (Favourites
+                            .select()
+                            .where(Favourites.reader == get_user_by_login().id))
 
     return render_template("favourites.html",
                            guest=guest,
-                           reader=reader,
                            favourites=favourites_query)
 
 
-@app.route("/genres")
-@app.route("/roles")
-@app.route("/statuses_of_formular")
-def ref():
-    ref_query = None
+@app.route("/genres", methods=["POST", "GET"])
+def genres():
+    genres_query = None
 
     guest = True
+    existing_code_or_name = False
+    genre_cannot_be_deleted = False
 
     if session.get("signed_in") and get_role_code() != "READER":
         guest = False
 
-        if "genres" in request.path:
-            model = Genre
-        elif "roles" in request.path:
-            model = Role
-        else:
-            model = Status_Of_Formular
+        genres_query = Genre.select()
 
-        ref_query = model.select()
+        if request.method == "POST":
+            genre_to_delete_id = request.form.get("delete_genre_button")
 
-    return render_template("ref.html",
+            code = request.form.get("code")
+            name = request.form.get("name")
+
+            existing_code = is_there_value_of_field(Genre, "code", code)
+            existing_name = is_there_value_of_field(Genre, "name", name)
+
+            existing_code_or_name = existing_code or existing_name
+
+            if genre_to_delete_id:
+                id_in_books = is_there_value_of_field(Book, "genre", genre_to_delete_id)
+
+                if not id_in_books:
+                    delete_row_by_id(genre_to_delete_id, Genre)
+                else:
+                    genre_cannot_be_deleted = True
+            elif not existing_code_or_name:
+                if request.form.get("enter"):
+                    add_new_row(Genre,
+                                {"code": code,
+                                 "name": name})
+
+    return render_template("genres.html",
                            guest=guest,
-                           ref=ref_query)
+                           existing_code_or_name=existing_code_or_name,
+                           genre_cannot_be_deleted=genre_cannot_be_deleted,
+                           genres=genres_query)

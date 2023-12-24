@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block head_title %}
+    Жанры
+{% endblock%}
+
+{% block body %}
+    {% if guest %}
+        <p style="text-align: center; color:red">
+            Данную страницу могут просматривать только
+            авторизованные пользователи, имеющие
+            соответствующие права
+        </p>
+
+        <p style="text-align: center">
+            <a href="http://127.0.0.1:5000/sign_in">
+                Авторизоваться
+            </a>
+        </p>
+    {% else %}
+        <p style="text-align: center">
+            <a href="http://127.0.0.1:5000">
+                ←
+            </a>
+        </p>
+
+        <table id="data"
+               class="table table-striped"
+               border="1"
+               style="border-collapse: collapse"
+               align="center">
+            <thead>
+                <tr>
+                    <th>Код</th>
+                    <th>Название</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for genre in genres %}
+                    <tr>
+                        <td>{{ genre.code }}</td>
+                        <td>{{ genre.name }}</td>
+                        <td>
+                            <form action="" method="post">
+                                <button type="submit"
+                                        name="delete_genre_button"
+                                        value="{{ genre.id }}">
+                                    Удалить
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        {% if genre_cannot_be_deleted %}
+            <p style="text-align: center; color:red">
+                Этот жанр нельзя удалять
+            </p>
+        {% endif %}
+
+        <p style="text-align: center">
+            Добавить жанр:
+        </p>
+
+        <form action="" method="post">
+            <p style="text-align: center">
+                <label for="code">
+                    Код:
+                </label>
+
+                <input type="text"
+                       id="code"
+                       name="code"
+                       size="30"
+                       required/>
+            </p>
+
+            <p style="text-align: center">
+                <label for="name">
+                    Название:
+                </label>
+
+                <input type="text"
+                       id="name"
+                       name="name"
+                       size="30"
+                       required/>
+            </p>
+
+            <p style="text-align: center">
+                <button type="submit"
+                        name="enter"
+                        value="4">
+                    Ок
+                </button>
+            </p>
+        </form>
+
+        {% if existing_code_or_name %}
+            <p style="text-align: center; color:red;">
+                Уже есть запись с таким кодом или с таким названием
+            </p>
+        {% endif %}
+    {% endif %}
+{% endblock %}

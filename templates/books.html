@@ -103,6 +103,12 @@
         </p>
     {% endif %}
 
+    {% if book_cannot_be_deleted %}
+        <p style="text-align: center; color:red">
+            Это издание нельзя удалять
+        </p>
+    {% endif %}
+
     {% if not reader %}
         <p style="text-align: center">
             {% if book_to_edit %}
@@ -110,13 +116,13 @@
             {% else %}
                 Добавить
             {% endif %}
-            издание
+            запись:
         </p>
 
         <form action="" method="post">
             <p style="text-align: center">
                 <label for="title">
-                    Название
+                    Название:
                 </label>
 
                 <input type="text"
@@ -128,7 +134,7 @@
 
             <p style="text-align: center">
                 <label for="author">
-                    Ф.И.О. автора
+                    Ф.И.О. автора:
                 </label>
 
                 <input type="text"
@@ -140,7 +146,7 @@
 
             <p style="text-align: center">
                 <label for="publisher">
-                    Издатель
+                    Издатель:
                 </label>
 
                 <input type="text"
@@ -152,7 +158,7 @@
 
             <p style="text-align: center">
                 <label for="release_year">
-                    Год выпуска
+                    Год выпуска:
                 </label>
 
                 <input type="text"
@@ -164,10 +170,11 @@
 
             <p style="text-align: center">
                 <label for="genres">
-                    Жанр
+                    Жанр:
                 </label>
 
                 <select name="genres" id="genres">
+                    <option value="">Выбрать жанр издания</option>
                     {% for genre in genres %}
                         <option value="{{ genre.id }}">{{ genre.name }}</option>
                     {% endfor %}
@@ -176,10 +183,17 @@
 
             <p style="text-align: center">
                 <button type="submit"
+                        name="enter"
                         value="4">
                     Ок
                 </button>
             </p>
         </form>
+
+        {% if add_book_without_genre %}
+            <p style="text-align: center; color:red;">
+                Вы не указали жанр нового издания
+            </p>
+        {% endif %}
     {% endif %}
 {% endblock %}
