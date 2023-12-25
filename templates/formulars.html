@@ -68,7 +68,7 @@
                             <td>
                                 <form action="" method="post">
                                     <button type="submit"
-                                            name="delete_formular"
+                                            name="delete_formular_button"
                                             value="{{ formular.id }}">
                                         Удалить
                                     </button>
@@ -79,5 +79,86 @@
                 {% endfor %}
             </tbody>
         </table>
+
+        {% if not reader %}
+            <p style="text-align: center">
+                {% if formular_to_edit %}
+                    Изменить
+                {% else %}
+                    Добавить
+                {% endif %}
+                формуляр:
+            </p>
+
+            <form action="" method="post">
+                <p style="text-align: center">
+                    <label for="users">
+                        Пользователь:
+                    </label>
+
+                    <select name="users" id="users">
+                        <option value="">Выбрать пользователя</option>
+                        {% for user in users %}
+                            <option value="{{ user.id }}">{{ user.login }}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+
+                <p style="text-align: center">
+                    <label for="books">
+                        Издание:
+                    </label>
+
+                    <select name="books" id="books">
+                        <option value="">Выбрать издание</option>
+                        {% for book in books %}
+                            <option value="{{ book.id }}">"{{ book.title }}", {{ book.author }}</option>
+                        {% endfor %}
+                    </select>
+                </p>
+
+                <p style="text-align: center">
+                    <label for="date_of_begin_of_reading">
+                        Дата начала чтения:
+                    </label>
+
+                    <input type="text"
+                           id="date_of_begin_of_reading"
+                           name="date_of_begin_of_reading"
+                           size="30"
+                           required/>
+                </p>
+
+                <p style="text-align: center">
+                    <label for="date_of_end_of_reading">
+                        Дата завершения чтения:
+                    </label>
+
+                    <input type="text"
+                           id="date_of_end_of_reading"
+                           name="date_of_end_of_reading"
+                           size="30"/>
+                </p>
+
+                <p style="text-align: center">
+                    <label for="was_book_read">
+                        Книга прочтена?
+                    </label>
+
+                    <select name="was_book_read" id="was_book_read">
+                        <option value="">Нет</option>
+                        <option value="1">Да</option>
+                    </select>
+                </p>
+
+                <p style="text-align: center">
+                    <button type="submit"
+                            name="enter"
+                            value="1">
+                        Ок
+                    </button>
+                </p>
+            </form>
+        {% endif %}
     {% endif %}
 {% endblock %}

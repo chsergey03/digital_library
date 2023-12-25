@@ -136,7 +136,7 @@ def books():
         book_to_edit = False
 
     book_is_already_favourite = False
-    add_book_without_genre = False
+    book_without_genre = False
     book_cannot_be_deleted = False
 
     reader = get_role_code() == "READER"
@@ -187,34 +187,35 @@ def books():
             return redirect(url_for(
                 "books",
                 book_to_edit_id_request_arg=book_to_edit_id))
-        elif book_to_edit_id_request_arg:
-            update_row(Book,
-                       book_to_edit_id_request_arg,
-                       {"title": title,
-                        "author": author,
-                        "publisher": publisher,
-                        "release_year": release_year,
-                        "genre": genre_id})
-
-            return redirect(url_for(
-                "books",
-                book_to_edit_id_request_arg=None))
         elif request.form.get("enter"):
             if genre_id:
-                add_new_row(Book,
-                            {"title": title,
-                             "author": author,
-                             "publisher": publisher,
-                             "release_year": release_year,
-                             "genre": genre_id})
+                if book_to_edit_id_request_arg:
+                    update_row(Book,
+                               book_to_edit_id_request_arg,
+                               {"title": title,
+                                "author": author,
+                                "publisher": publisher,
+                                "release_year": release_year,
+                                "genre": genre_id})
+
+                    return redirect(url_for(
+                        "books",
+                        book_to_edit_id_request_arg=None))
+                else:
+                    add_new_row(Book,
+                                {"title": title,
+                                 "author": author,
+                                 "publisher": publisher,
+                                 "release_year": release_year,
+                                 "genre": genre_id})
             else:
-                add_book_without_genre = True
+                book_without_genre = True
 
     return render_template(
         "books.html",
         reader=reader,
         book_is_already_favourite=book_is_already_favourite,
-        add_book_without_genre=add_book_without_genre,
+        book_without_genre=book_without_genre,
         book_cannot_be_deleted=book_cannot_be_deleted,
         book_to_edit=book_to_edit,
         genres=genres_query,
@@ -280,6 +281,8 @@ def users():
 @app.route("/formulars", methods=["POST", "GET"])
 def formulars():
     formulars_query = None
+    users_query = None
+    books_query = None
 
     guest = True
     reader = False
@@ -302,14 +305,38 @@ def formulars():
                                .select()
                                .where(Formular.reader == user.id))
         else:
-            try_to_delete_row_through_form("delete_formular",
-                                           Formular)
+            users_query = User.select()
+            books_query = Book.select()
 
             formulars_query = Formular.select()
+
+            if request.method == "POST":
+                formular_to_delete_id = request.form.get("delete_formular_button")
+
+                user_id = request.form.get("users")
+                book_id = request.form.get("books")
+
+                add_user_without_user_or_book_id = (not user_id) or (not book_id)
+
+                date_of_begin_of_reading = request.form.get("date_of_begin_of_reading")
+                date_of_end_of_reading = request.form.get("date_of_begin_of_reading")
+                was_book_read = True if request.form.get("was_book_read") else False
+
+                if formular_to_delete_id:
+                    delete_row_by_id(formular_to_delete_id, Formular)
+                elif request.form.get("enter") and not add_user_without_user_or_book_id:
+                    add_new_row(Formular,
+                                {"reader": user_id,
+                                 "book": book_id,
+                                 "date_of_begin_of_reading": date_of_begin_of_reading,
+                                 "date_of_end_of_reading": date_of_end_of_reading,
+                                 "read": was_book_read})
 
     return render_template("formulars.html",
                            guest=guest,
                            reader=reader,
+                           users=users_query,
+                           books=books_query,
                            formulars=formulars_query)
 
 

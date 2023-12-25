@@ -70,7 +70,12 @@
         {% endif %}
 
         <p style="text-align: center">
-            Добавить жанр:
+            {% if genre_to_edit %}
+                Изменить
+            {% else %}
+                Добавить
+            {% endif %}
+            жанр:
         </p>
 
         <form action="" method="post">
