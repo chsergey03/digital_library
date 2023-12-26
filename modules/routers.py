@@ -189,25 +189,24 @@ def books():
                 book_to_edit_id_request_arg=book_to_edit_id))
         elif request.form.get("enter"):
             if genre_id:
+                row_data_dict = \
+                    {"title": title,
+                     "author": author,
+                     "publisher": publisher,
+                     "release_year": release_year,
+                     "genre": genre_id}
+
                 if book_to_edit_id_request_arg:
                     update_row(Book,
                                book_to_edit_id_request_arg,
-                               {"title": title,
-                                "author": author,
-                                "publisher": publisher,
-                                "release_year": release_year,
-                                "genre": genre_id})
+                               row_data_dict)
 
                     return redirect(url_for(
                         "books",
                         book_to_edit_id_request_arg=None))
                 else:
                     add_new_row(Book,
-                                {"title": title,
-                                 "author": author,
-                                 "publisher": publisher,
-                                 "release_year": release_year,
-                                 "genre": genre_id})
+                                row_data_dict)
             else:
                 book_without_genre = True
 
@@ -286,6 +285,7 @@ def formulars():
 
     guest = True
     reader = False
+    formular_to_edit = False
 
     login = get_login_from_cookies()
 
@@ -305,13 +305,26 @@ def formulars():
                                .select()
                                .where(Formular.reader == user.id))
         else:
+            formular_to_edit_id_request_arg = (
+                request.args.get("formular_to_edit_id_request_arg"))
+
+            if formular_to_edit_id_request_arg:
+                formulars_query = (Formular
+                                   .select()
+                                   .where(Formular.id == formular_to_edit_id_request_arg))
+
+                formular_to_edit = True
+            else:
+                formulars_query = Formular.select()
+
+                formular_to_edit = False
+
             users_query = User.select()
             books_query = Book.select()
 
-            formulars_query = Formular.select()
-
             if request.method == "POST":
                 formular_to_delete_id = request.form.get("delete_formular_button")
+                formular_to_edit_id = request.form.get("edit_formular_button")
 
                 user_id = request.form.get("users")
                 book_id = request.form.get("books")
@@ -322,19 +335,37 @@ def formulars():
                 date_of_end_of_reading = request.form.get("date_of_begin_of_reading")
                 was_book_read = True if request.form.get("was_book_read") else False
 
-                if formular_to_delete_id:
+                if request.form.get("export_to_json_button"):
+                    export_data_of_query_to_json(formulars_query, "formulars.json")
+                elif request.form.get("export_to_csv_button"):
+                    export_data_of_query_to_csv(formulars_query, "formulars.csv")
+                elif formular_to_delete_id:
                     delete_row_by_id(formular_to_delete_id, Formular)
+                elif formular_to_edit_id:
+                    return redirect(url_for(
+                        "formulars",
+                        formular_to_edit_id_request_arg=formular_to_edit_id))
                 elif request.form.get("enter") and not add_user_without_user_or_book_id:
-                    add_new_row(Formular,
-                                {"reader": user_id,
-                                 "book": book_id,
-                                 "date_of_begin_of_reading": date_of_begin_of_reading,
-                                 "date_of_end_of_reading": date_of_end_of_reading,
-                                 "read": was_book_read})
+                    row_data_dict = \
+                        {"reader": user_id,
+                         "book": book_id,
+                         "date_of_begin_of_reading": date_of_begin_of_reading,
+                         "date_of_end_of_reading": date_of_end_of_reading,
+                         "read": was_book_read}
+
+                    if formular_to_edit_id_request_arg:
+                        update_row(Formular, formular_to_edit_id_request_arg, row_data_dict)
+
+                        return redirect(url_for(
+                            "formulars",
+                            formular_to_edit_id_request_arg=None))
+                    else:
+                        add_new_row(Formular, row_data_dict)
 
     return render_template("formulars.html",
                            guest=guest,
                            reader=reader,
+                           formular_to_edit=formular_to_edit,
                            users=users_query,
                            books=books_query,
                            formulars=formulars_query)
