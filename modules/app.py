@@ -1,4 +1,4 @@
-from flask import Flask, session
+from flask import Flask
 from peewee import PostgresqlDatabase
 
 app = Flask(__name__, template_folder="../templates")
