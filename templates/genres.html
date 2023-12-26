@@ -5,6 +5,12 @@
 {% endblock%}
 
 {% block body %}
+    <p style="text-align: center">
+        <a href="http://127.0.0.1:5000">
+            ←
+        </a>
+    </p>
+
     {% if guest %}
         <p style="text-align: center; color:red">
             Данную страницу могут просматривать только
@@ -18,50 +24,52 @@
             </a>
         </p>
     {% else %}
-        <p style="text-align: center">
-            <a href="http://127.0.0.1:5000">
-                ←
-            </a>
-        </p>
+        <h3 style="text-align: center">Жанры</h3>
 
-        <table id="data"
-               class="table table-striped"
-               border="1"
-               style="border-collapse: collapse"
-               align="center">
-            <thead>
-                <tr>
-                    <th>Код</th>
-                    <th>Название</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for genre in genres %}
+        {% if genres %}
+            <table id="data"
+                   class="table table-striped"
+                   border="1"
+                   style="border-collapse: collapse"
+                   align="center">
+                <thead>
                     <tr>
-                        <td>{{ genre.code }}</td>
-                        <td>{{ genre.name }}</td>
-                        <td>
-                            <form action="" method="post">
-                                <button type="submit"
-                                        name="delete_genre_button"
-                                        value="{{ genre.id }}">
-                                    Удалить
-                                </button>
-                            </form>
-                        </td>
-                        <td>
-                            <form action="" method="post">
-                                <button type="submit"
-                                        name="edit_genre_button"
-                                        value="{{ genre.id }}">
-                                    Изменить
-                                </button>
-                            </form>
-                        </td>
+                        <th>Код</th>
+                        <th>Название</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for genre in genres %}
+                        <tr>
+                            <td>{{ genre.code }}</td>
+                            <td>{{ genre.name }}</td>
+                            <td>
+                                <form action="" method="post">
+                                    <button type="submit"
+                                            name="delete_genre_button"
+                                            value="{{ genre.id }}">
+                                        Удалить
+                                    </button>
+                                </form>
+                            </td>
+                            <td>
+                                <form action="" method="post">
+                                    <button type="submit"
+                                            name="edit_genre_button"
+                                            value="{{ genre.id }}">
+                                        Изменить
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="text-align: center; color: darkorange">
+                Таблица пуста
+            </p>
+        {% endif %}
 
         {% if genre_cannot_be_deleted %}
             <p style="text-align: center; color:red">

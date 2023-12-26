@@ -11,6 +11,8 @@
         </a>
     </p>
 
+    <h3 style="text-align: center">Издания</h3>
+
     <form action="" method="post">
         <p style="text-align: center">
             <label for="title_substr"></label>
@@ -44,58 +46,64 @@
         </p>
     </form>
 
-    <table id="data"
-           class="table table-striped"
-           border="1"
-           style="border-collapse: collapse"
-           align="center">
-        <thead>
-            <tr>
-                <th>Название</th>
-                <th>Ф.И.О. автора</th>
-                <th>Издательство</th>
-                <th>Год выпуска</th>
-                <th>Жанр</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for book in books %}
+    {% if books %}
+        <table id="data"
+               class="table table-striped"
+               border="1"
+               style="border-collapse: collapse"
+               align="center">
+            <thead>
                 <tr>
-                    <td>{{ book.title }}</td>
-                    <td>{{ book.author }}</td>
-                    <td>{{ book.publisher }}</td>
-                    <td>{{ book.release_year }}</td>
-                    <td>{{ book.genre.name }}</td>
-                    {% if not book_to_edit %}
-                        <td>
-                            <form action="" method="post">
-                                <button type="submit"
-                                        name="book_button"
-                                        value="{{ book.id }}">
-                                    {% if reader %}
-                                        В избранное
-                                    {% else %}
-                                        Удалить
-                                    {% endif %}
-                                </button>
-                            </form>
-                        </td>
-                        {% if not reader %}
+                    <th>Название</th>
+                    <th>Ф.И.О. автора</th>
+                    <th>Издательство</th>
+                    <th>Год выпуска</th>
+                    <th>Жанр</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for book in books %}
+                    <tr>
+                        <td>{{ book.title }}</td>
+                        <td>{{ book.author }}</td>
+                        <td>{{ book.publisher }}</td>
+                        <td>{{ book.release_year }}</td>
+                        <td>{{ book.genre.name }}</td>
+                        {% if not guest and not book_to_edit %}
                             <td>
                                 <form action="" method="post">
                                     <button type="submit"
-                                            name="edit_book_button"
+                                            name="book_button"
                                             value="{{ book.id }}">
-                                        Изменить
+                                        {% if reader %}
+                                            В избранное
+                                        {% else %}
+                                            Удалить
+                                        {% endif %}
                                     </button>
                                 </form>
                             </td>
+                            {% if not reader %}
+                                <td>
+                                    <form action="" method="post">
+                                        <button type="submit"
+                                                name="edit_book_button"
+                                                value="{{ book.id }}">
+                                            Изменить
+                                        </button>
+                                    </form>
+                                </td>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p style="text-align: center; color: darkorange">
+            Таблица пуста
+        </p>
+    {% endif %}
 
     {% if book_is_already_favourite %}
         <p style="text-align: center; color:red">
@@ -109,7 +117,7 @@
         </p>
     {% endif %}
 
-    {% if not reader %}
+    {% if not guest and not reader %}
         <p style="text-align: center">
             {% if book_to_edit %}
                 Изменить

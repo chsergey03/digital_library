@@ -5,14 +5,6 @@ from flask import (request, render_template, redirect,
                    url_for, session, make_response)
 
 from bcrypt import hashpw, checkpw, gensalt
-from enum import StrEnum
-
-
-class FormsNames(StrEnum):
-    LOGIN = "login"
-    EMAIL = "email"
-    PASSWORD = "password"
-    REPEAT_OF_PASSWORD = "repeat_of_password"
 
 
 def init_session():
@@ -39,15 +31,23 @@ def get_response_of_dropped_session():
 
 @app.route("/")
 def index():
+    guest = not session.get("signed_in")
     not_reader = False
+    admin = False
+    login = ""
 
-    if session.get("signed_in"):
+    if not guest:
+        login = get_login_from_cookies()
+
         role_code = get_role_code()
 
         not_reader = role_code != "READER"
+        admin = role_code == "ADMIN"
 
     return render_template("index.html",
+                           login=login,
                            not_reader=not_reader,
+                           admin=admin,
                            authenticated=session.get("signed_in"))
 
 
@@ -56,8 +56,8 @@ def sign_in():
     error = False
 
     if request.method == "POST":
-        login_value = request.form.get(FormsNames.LOGIN)
-        password_value = request.form.get(FormsNames.PASSWORD)
+        login_value = request.form.get("login")
+        password_value = request.form.get("password")
 
         query = (User
                  .select(User.password_hash)
@@ -89,14 +89,14 @@ def register():
     existing_login, existing_email, mismatched_passwords = False, False, False
 
     if request.method == "POST":
-        login_value = request.form.get(FormsNames.LOGIN)
-        existing_login = is_there_value_of_field(User, FormsNames.LOGIN, login_value)
+        login_value = request.form.get("login")
+        existing_login = is_there_value_of_field(User, "login", login_value)
 
-        email_value = request.form.get(FormsNames.EMAIL)
-        existing_email = is_there_value_of_field(User, FormsNames.EMAIL, email_value)
+        email_value = request.form.get("email")
+        existing_email = is_there_value_of_field(User, "email", email_value)
 
-        password_value = request.form.get(FormsNames.PASSWORD)
-        repeat_of_password_value = request.form.get(FormsNames.REPEAT_OF_PASSWORD)
+        password_value = request.form.get("password")
+        repeat_of_password_value = request.form.get("repeat_of_password")
 
         mismatched_passwords = password_value != repeat_of_password_value
 
@@ -138,8 +138,13 @@ def books():
     book_is_already_favourite = False
     book_without_genre = False
     book_cannot_be_deleted = False
+    reader = False
+    guest = not session.get("signed_in")
 
-    reader = get_role_code() == "READER"
+    if not guest:
+        role_code = get_role_code()
+
+        reader = role_code == "READER"
 
     genres_query = Genre.select() if not reader else None
 
@@ -212,6 +217,7 @@ def books():
 
     return render_template(
         "books.html",
+        guest=guest,
         reader=reader,
         book_is_already_favourite=book_is_already_favourite,
         book_without_genre=book_without_genre,
@@ -226,12 +232,10 @@ def users():
     users_query = None
     roles_query = None
 
-    guest = True
+    guest = not session.get("signed_in") or get_role_code() != "ADMIN"
     user_role_to_edit = False
 
-    if session.get("signed_in") and get_role_code() == "ADMIN":
-        guest = False
-
+    if not guest:
         user_role_to_edit_id_request_arg = (
             request.args.get("user_role_to_edit_id_request_arg"))
 
@@ -283,15 +287,11 @@ def formulars():
     users_query = None
     books_query = None
 
-    guest = True
+    guest = not session.get("signed_in")
     reader = False
     formular_to_edit = False
 
-    login = get_login_from_cookies()
-
-    if session.get("signed_in") and login:
-        guest = False
-
+    if not guest and get_role_code() != "READER":
         user = get_user_by_login()
 
         role_code = (Role
@@ -375,11 +375,9 @@ def formulars():
 def favourites():
     favourites_query = None
 
-    guest = True
+    guest = not session.get("signed_in")
 
-    if session.get("signed_in") and get_role_code() == "READER":
-        guest = False
-
+    if not guest and get_role_code() == "READER":
         try_to_delete_row_through_form("delete_from_favourites",
                                        Favourites)
 
@@ -396,14 +394,12 @@ def favourites():
 def genres():
     genres_query = None
 
-    guest = True
+    guest = not session.get("signed_in")
     existing_code_or_name = False
     genre_cannot_be_deleted = False
     genre_to_edit = False
 
-    if session.get("signed_in") and get_role_code() != "READER":
-        guest = False
-
+    if not guest and get_role_code() != "READER":
         genre_to_edit_id_request_arg = request.args.get("genre_to_edit_id_request_arg")
 
         if genre_to_edit_id_request_arg:

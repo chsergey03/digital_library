@@ -5,6 +5,12 @@
 {% endblock%}
 
 {% block body %}
+    <p style="text-align: center">
+        <a href="http://127.0.0.1:5000">
+            ←
+        </a>
+    </p>
+
     {% if guest %}
         <p style="text-align: center; color:red">
             Данную страницу могут просматривать только
@@ -18,11 +24,7 @@
             </a>
         </p>
     {% else %}
-        <p style="text-align: center">
-            <a href="http://127.0.0.1:5000">
-                ←
-            </a>
-        </p>
+        <h3 style="text-align: center">Формуляры</h3>
 
         <form action="" method="post">
             <p style="text-align: center">
@@ -40,70 +42,76 @@
             </p>
         </form>
 
-        <table id="data"
-               class="table table-striped"
-               border="1"
-               style="border-collapse: collapse"
-               align="center">
-            <thead>
-                <tr>
-                    {% if not reader %}
-                        <th>Логин читателя</th>
-                    {% endif %}
-                    <th>Название книги</th>
-                    <th>Ф.И.О. автора</th>
-                    <th>Дата начала чтения</th>
-                    <th>Дата завершения чтения</th>
-                    <th>Книга прочтена?</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for formular in formulars %}
+        {% if formulars %}
+            <table id="data"
+                   class="table table-striped"
+                   border="1"
+                   style="border-collapse: collapse"
+                   align="center">
+                <thead>
                     <tr>
                         {% if not reader %}
-                            <td>{{ formular.reader.login }}</td>
+                            <th>Логин читателя</th>
                         {% endif %}
-                        <td>{{ formular.book.title }}</td>
-                        <td>{{ formular.book.author }}</td>
-                        <td>{{ formular.date_of_begin_of_reading }}</td>
-                        <td>
-                            {% if formular.date_of_end_of_reading %}
-                                {{ formular.date_of_end_of_reading }}
-                            {% else %}
-                                -
-                            {% endif %}
-                        </td>
-                        <td>
-                            {% if formular.read %}
-                                Да
-                            {% else %}
-                                Нет
-                            {% endif %}
-                        </td>
-                        {% if not reader %}
-                            <td>
-                                <form action="" method="post">
-                                    <button type="submit"
-                                            name="delete_formular_button"
-                                            value="{{ formular.id }}">
-                                        Удалить
-                                    </button>
-                                </form>
-                            </td>
-                            <td>
-                                <form action="" method="post">
-                                    <button type="submit"
-                                            name="edit_formular_button"
-                                            value="{{ formular.id }}">
-                                        Изменить
-                                    </button>
-                                </form>
-                            </td>
-                        {% endif %}
+                        <th>Название книги</th>
+                        <th>Ф.И.О. автора</th>
+                        <th>Дата начала чтения</th>
+                        <th>Дата завершения чтения</th>
+                        <th>Книга прочтена?</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for formular in formulars %}
+                        <tr>
+                            {% if not reader %}
+                                <td>{{ formular.reader.login }}</td>
+                            {% endif %}
+                            <td>{{ formular.book.title }}</td>
+                            <td>{{ formular.book.author }}</td>
+                            <td>{{ formular.date_of_begin_of_reading }}</td>
+                            <td>
+                                {% if formular.date_of_end_of_reading %}
+                                    {{ formular.date_of_end_of_reading }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if formular.read %}
+                                    Да
+                                {% else %}
+                                    Нет
+                                {% endif %}
+                            </td>
+                            {% if not reader %}
+                                <td>
+                                    <form action="" method="post">
+                                        <button type="submit"
+                                                name="delete_formular_button"
+                                                value="{{ formular.id }}">
+                                            Удалить
+                                        </button>
+                                    </form>
+                                </td>
+                                <td>
+                                    <form action="" method="post">
+                                        <button type="submit"
+                                                name="edit_formular_button"
+                                                value="{{ formular.id }}">
+                                            Изменить
+                                        </button>
+                                    </form>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="text-align: center; color: darkorange">
+                Таблица пуста
+            </p>
+        {% endif %}
 
         {% if not reader %}
             <p style="text-align: center">

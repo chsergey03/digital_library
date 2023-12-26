@@ -5,6 +5,12 @@
 {% endblock%}
 
 {% block body %}
+    <p style="text-align: center">
+        <a href="http://127.0.0.1:5000">
+            ←
+        </a>
+    </p>
+
     {% if guest %}
         <p style="text-align: center; color:red">
             Данную страницу могут просматривать только
@@ -18,43 +24,45 @@
             </a>
         </p>
     {% else %}
-        <p style="text-align: center">
-            <a href="http://127.0.0.1:5000">
-                ←
-            </a>
-        </p>
+        <h3 style="text-align: center">Пользователи</h3>
 
-        <table id="data"
-               class="table table-striped"
-               border="1"
-               style="border-collapse: collapse"
-               align="center">
-            <thead>
-                <tr>
-                    <th>Логин</th>
-                    <th>Адрес электронной почты</th>
-                    <th>Роль пользователя</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
+        {% if users %}
+            <table id="data"
+                   class="table table-striped"
+                   border="1"
+                   style="border-collapse: collapse"
+                   align="center">
+                <thead>
                     <tr>
-                        <td>{{ user.login }}</td>
-                        <td>{{ user.email }}</td>
-                        <td>{{ user.role.name }}</td>
-                        <td>
-                            <form action="" method="post">
-                                <button type="submit"
-                                        name="edit_user_role_button"
-                                        value="{{ user.id }}">
-                                    Изменить роль
-                                </button>
-                            </form>
-                        </td>
+                        <th>Логин</th>
+                        <th>Адрес электронной почты</th>
+                        <th>Роль пользователя</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>{{ user.login }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.role.name }}</td>
+                            <td>
+                                <form action="" method="post">
+                                    <button type="submit"
+                                            name="edit_user_role_button"
+                                            value="{{ user.id }}">
+                                        Изменить роль
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p style="text-align: center; color: darkorange">
+                Таблица пуста
+            </p>
+        {% endif %}
 
         {% if user_role_to_edit %}
             <p style="text-align: center">

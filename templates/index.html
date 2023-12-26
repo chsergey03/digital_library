@@ -13,17 +13,23 @@
         </p>
     {% else %}
         <p style="text-align: center">
+            Логин пользователя: {{ login }}
+        </p>
+
+        <p style="text-align: center">
             <a href="http://127.0.0.1:5000/sign_out">
                 Выход
             </a>
         </p>
 
         {% if not_reader %}
-            <p style="text-align: center">
-                <a href="http://127.0.0.1:5000/users">
-                    Пользователи
-                </a>
-            </p>
+            {% if admin %}
+                <p style="text-align: center">
+                    <a href="http://127.0.0.1:5000/users">
+                        Пользователи
+                    </a>
+                </p>
+            {% endif %}
 
             <p style="text-align: center">
                 <a href="http://127.0.0.1:5000/genres">
