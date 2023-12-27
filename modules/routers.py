@@ -291,7 +291,7 @@ def formulars():
     reader = False
     formular_to_edit = False
 
-    if not guest and get_role_code() != "READER":
+    if not guest:
         user = get_user_by_login()
 
         role_code = (Role
@@ -319,7 +319,9 @@ def formulars():
 
                 formular_to_edit = False
 
-            users_query = User.select()
+            users_query = (User.select()
+                           .where(User.role == Role.get(Role.code == "READER").id))
+
             books_query = Book.select()
 
             if request.method == "POST":
