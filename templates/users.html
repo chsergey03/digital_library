@@ -45,15 +45,17 @@
                             <td>{{ user.login }}</td>
                             <td>{{ user.email }}</td>
                             <td>{{ user.role.name }}</td>
-                            <td>
-                                <form action="" method="post">
-                                    <button type="submit"
-                                            name="edit_user_role_button"
-                                            value="{{ user.id }}">
-                                        Изменить роль
-                                    </button>
-                                </form>
-                            </td>
+                            {% if not user_role_to_edit %}
+                                <td>
+                                    <form action="" method="post">
+                                        <button type="submit"
+                                                name="edit_user_role_button"
+                                                value="{{ user.id }}">
+                                            Изменить роль
+                                        </button>
+                                    </form>
+                                </td>
+                            {% endif %}
                         </tr>
                     {% endfor %}
                 </tbody>
